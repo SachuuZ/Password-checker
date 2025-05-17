@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Password Strength Checker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px auto;
+            max-width: 700px;
+            background-color: #f4f4f4;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            text-align: center;
+        }
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+        }
+        .suggestion-list {
+            padding-left: 20px;
+        }
+        .crack-time {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔐 Password Strength Checker</h1>
+
+    <form method="POST">
+        <label for="password"><strong>Enter your password:</strong></label><br>
+        <input type="password" id="password" name="password" required style="width: 100%; padding: 10px; margin-top: 10px;">
+        <br><br>
+        <button type="submit" style="padding: 10px 20px;">Check Strength</button>
+    </form>
+
+    {% if result %}
+    <div class="result">
+        <h2>🔎 Strength: {{ strength }} ({{ result['score'] }} / 4)</h2>
+
+        <p class="crack-time">
+            ⏱ Estimated crack time: 
+            <span style="color: {% if result['score'] < 2 %}red{% elif result['score'] == 2 %}orange{% else %}green{% endif %};">
+                {{ result['crack_times_display']['offline_slow_hashing_1e4_per_second'] }}
+            </span>
+        </p>
+
+        {% if pwned is not none %}
+            {% if pwned > 0 %}
+                <p style="color: red;">⚠️ Found in {{ pwned }} data breaches!</p>
+            {% else %}
+                <p style="color: green;">✅ This password was not found in any known breaches.</p>
+            {% endif %}
+        {% endif %}
+
+        {% if result['feedback']['warning'] %}
+            <p><strong>⚠️ Feedback:</strong> {{ result['feedback']['warning'] }}</p>
+        {% endif %}
+
+        {% if result['feedback']['suggestions'] or custom %}
+            <p><strong>💡 Suggestions to improve your password:</strong></p>
+            <ul class="suggestion-list">
+                {% for item in result['feedback']['suggestions'] + custom %}
+                    <li>{{ item }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+    {% endif %}
+</body>
+</html>

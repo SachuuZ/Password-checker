@@ -17,14 +17,6 @@ https://password-checker-i7t2.onrender.com
 - requests
 - HTML/CSS
 
-## Folder Structure
-Password-checker/
-├── app.py
-├── requirements.txt
-├── templates/
-│ └── index.html
-└── README.md
-
 ## Setup Instructions
 
 1. Clone the repository:

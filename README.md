@@ -1,4 +1,5 @@
 # Password Checker
+
 A web-based tool to check the strength of passwords using Flask and zxcvbn. It also checks if your password has appeared in known data breaches using the Have I Been Pwned API.
 
 ## Live Demo

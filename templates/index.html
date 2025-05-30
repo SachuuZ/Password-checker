@@ -1,77 +1,196 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Password Strength Checker</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 40px auto;
-            max-width: 700px;
-            background-color: #f4f4f4;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-        }
-        h1, h2 {
-            text-align: center;
-        }
-        .result {
-            margin-top: 30px;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 8px;
-        }
-        .suggestion-list {
-            padding-left: 20px;
-        }
-        .crack-time {
-            font-weight: bold;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Password Strength Checker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      background: radial-gradient(circle at center, #1e1e2f, #2a2a40);
+      background-repeat: no-repeat;
+      background-size: 200% 200%;
+      transition: background-position 0.1s ease-out;
+      color: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    .container {
+      background-color: rgba(26, 26, 47, 0.95);
+      padding: 30px;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 600px;
+      box-shadow: 0 8px 30px rgba(0, 255, 255, 0.15);
+      backdrop-filter: blur(8px);
+    }
+
+    h1 {
+      text-align: center;
+      color: #00ffff;
+      margin-bottom: 20px;
+    }
+
+    label {
+      font-size: 1rem;
+      margin-bottom: 8px;
+      display: inline-block;
+    }
+
+    input[type="password"] {
+      width: 100%;
+      padding: 12px;
+      margin-top: 8px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      background-color: #333348;
+      color: white;
+      transition: box-shadow 0.3s ease;
+    }
+
+    input[type="password"]:focus {
+      outline: none;
+      box-shadow: 0 0 8px #00ffff;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 20px;
+      font-size: 16px;
+      background-color: #00ffff;
+      border: none;
+      border-radius: 8px;
+      color: black;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #00d4d4;
+    }
+
+    .result {
+      margin-top: 30px;
+      background-color: #1a1a2f;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: inset 0 0 10px rgba(0,255,255,0.1);
+    }
+
+    .crack-time {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .suggestion-list {
+      padding-left: 20px;
+    }
+
+    .bar-container {
+      height: 12px;
+      background: #333;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .bar {
+      height: 100%;
+      transition: width 0.4s ease-in-out;
+    }
+
+    .bar.low { width: 25%; background: red; }
+    .bar.medium { width: 50%; background: orange; }
+    .bar.good { width: 75%; background: yellowgreen; }
+    .bar.strong { width: 100%; background: lime; }
+
+    @media screen and (max-width: 600px) {
+      body {
+        padding: 20px 10px;
+      }
+
+      .container {
+        padding: 20px;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      input, button {
+        font-size: 15px;
+      }
+    }
+  </style>
 </head>
 <body>
+  <div class="container">
     <h1>🔐 Password Strength Checker</h1>
-
     <form method="POST">
-        <label for="password"><strong>Enter your password:</strong></label><br>
-        <input type="password" id="password" name="password" required style="width: 100%; padding: 10px; margin-top: 10px;">
-        <br><br>
-        <button type="submit" style="padding: 10px 20px;">Check Strength</button>
+      <label for="password">Enter your password:</label>
+      <input type="password" id="password" name="password" required>
+      <button type="submit">Check Strength</button>
     </form>
 
     {% if result %}
     <div class="result">
-        <h2>🔎 Strength: {{ strength }} ({{ result['score'] }} / 4)</h2>
+      <h2>🔎 Strength: {{ strength }} ({{ result['score'] }} / 4)</h2>
 
-        <p class="crack-time">
-            ⏱ Estimated crack time: 
-            <span style="color: {% if result['score'] < 2 %}red{% elif result['score'] == 2 %}orange{% else %}green{% endif %};">
-                {{ result['crack_times_display']['offline_slow_hashing_1e4_per_second'] }}
-            </span>
-        </p>
+      <div class="bar-container">
+        <div class="bar {% if result['score'] == 0 %}low{% elif result['score'] == 1 %}low{% elif result['score'] == 2 %}medium{% elif result['score'] == 3 %}good{% else %}strong{% endif %}"></div>
+      </div>
 
-        {% if pwned is not none %}
-            {% if pwned > 0 %}
-                <p style="color: red;">⚠️ Found in {{ pwned }} data breaches!</p>
-            {% else %}
-                <p style="color: green;">✅ This password was not found in any known breaches.</p>
-            {% endif %}
+      <p class="crack-time">
+        ⏱ Estimated crack time: 
+        <span style="color: {% if result['score'] < 2 %}red{% elif result['score'] == 2 %}orange{% else %}lightgreen{% endif %};">
+          {{ result['crack_times_display']['offline_slow_hashing_1e4_per_second'] }}
+        </span>
+      </p>
+
+      {% if pwned is not none %}
+        {% if pwned > 0 %}
+          <p style="color: red;">⚠️ Found in {{ pwned }} data breaches!</p>
+        {% else %}
+          <p style="color: lightgreen;">✅ Not found in any known breaches.</p>
         {% endif %}
+      {% endif %}
 
-        {% if result['feedback']['warning'] %}
-            <p><strong>⚠️ Feedback:</strong> {{ result['feedback']['warning'] }}</p>
-        {% endif %}
+      {% if result['feedback']['warning'] %}
+        <p><strong>⚠️ Warning:</strong> {{ result['feedback']['warning'] }}</p>
+      {% endif %}
 
-        {% if result['feedback']['suggestions'] or custom %}
-            <p><strong>💡 Suggestions to improve your password:</strong></p>
-            <ul class="suggestion-list">
-                {% for item in result['feedback']['suggestions'] + custom %}
-                    <li>{{ item }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
+      {% if result['feedback']['suggestions'] or custom %}
+        <p><strong>💡 Suggestions:</strong></p>
+        <ul class="suggestion-list">
+          {% for item in result['feedback']['suggestions'] + custom %}
+            <li>{{ item }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
     </div>
     {% endif %}
+  </div>
+
+  <!-- 🔁 Cursor-Responsive Background Script -->
+  <script>
+    document.addEventListener('mousemove', e => {
+      const x = e.clientX / window.innerWidth;
+      const y = e.clientY / window.innerHeight;
+      document.body.style.backgroundPosition = `${x * 100}% ${y * 100}%`;
+    });
+  </script>
 </body>
 </html>
